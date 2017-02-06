@@ -26,12 +26,6 @@
         --pickle-file-in $pickle_file_out
         --path-out .
         --separator $separator
-        &&
-        python -c "import time; time.sleep(10)"
-        &&
-        cp *.* /Users/RW/Dropbox/Projects/Bioinformatics/Development/DIMS-workflow-development/computational/data/test/
-        &&
-        python -c "import time; time.sleep(10)"
     ]]></command>
     <inputs>
         <conditional name="input">
