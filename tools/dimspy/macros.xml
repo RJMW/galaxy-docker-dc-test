@@ -1,0 +1,26 @@
+<macros>
+    <xml name="requirements">
+        <requirements>
+            <requirement type="package" version="1.11.3">numpy</requirement>
+            <requirement type="package" version="0.18.1">scipy</requirement>
+            <requirement type="package" version="0.7.7">pymzml</requirement>
+            <requirement type="package" version="1.1.21">fastcluster</requirement>
+            <requirement type="package" version="0.0.1">dimspy</requirement>
+            <requirement type="package" version="2.6.0">h5py</requirement>
+        </requirements>
+    </xml>
+    <xml name="stdio">ls
+        <stdio>
+            <exit_code range="1:" />
+        </stdio>
+    </xml>
+    <xml name="citations">
+        <citations>
+            <citation type="doi">10.1038/nprot.2016.156</citation>
+            <citation type="doi">10.1038/sdata.2014.12</citation>
+            <citation type="doi">10.1021/ac062446p</citation>
+            <citation type="doi">10.1021/ac2001803</citation>
+            <yield />
+        </citations>
+    </xml>
+</macros>

@@ -1,0 +1,117 @@
+<tool id="process_scans" name="Process Scans and/or SIM-Stitch" version="0.1.0">
+    <macros>
+        <import>macros.xml</import>
+    </macros>
+    <!-- <expand macro="requirements" /> -->
+    <expand macro="stdio" />
+    <command><![CDATA[
+        python -m dimspy process-scans
+        --source $source
+        --pickle-file-out $pickle_file_out
+        --filelist $filelist
+        --function-noise $function_noise
+        --snr-threshold $snr_threshold
+        --ppm $ppm
+        #if $nscans > 0
+            --nscans $nscans
+        #end if
+        #if $min_fraction
+            --min-fraction $min_fraction
+        #end if
+        #if $rsd_threshold
+            --rsd-threshold $rsd_threshold
+        #end if
+        &&
+        python -m dimspy pickle-to-readable
+        --pickle-file-in $pickle_file_out
+        --path-out .
+        --separator $separator
+        &&
+        python -c "import time; time.sleep(10)"
+        &&
+        cp *.* /Users/RW/Dropbox/Projects/Bioinformatics/Development/DIMS-workflow-development/computational/data/test/
+        &&
+        python -c "import time; time.sleep(10)"
+    ]]></command>
+    <inputs>
+        <conditional name="input">
+            <param name="format" type="select" label="Choose your format for input" >
+                <option value="zip_file" selected="true">Zip file from your history containing *.mzML files</option>
+                <!-- <option value="lib">Library directory name</option>
+                <option value="path">Absolute path to the *.raw or *.mzMl files</option> -->
+            </param>
+            <when value="zip_file">
+                <param name="source" type="data" format="zip" label="Mass spectral data (zip file)" argument="--source">
+                <validator type="empty_field" />
+                </param>
+            </when>
+            <!-- <when value="lib">
+                <param name="source" type="text" size="40" label="Library directory name" argument="-source">
+                <validator type="empty_field" />
+                </param>
+            </when>
+            <when value="path">
+                <param name="source" type="text" size="40" label="Path" argument="-source" >
+                <validator type="empty_field" />
+                </param>
+            </when> -->
+        </conditional>
+        <param name="filelist" type="data" format="tsv,tabular" label="Filelist" argument="--filelist" />
+        <!-- <param name="filename_experiment" type="hidden" format="tsv" label="Description experiment" argument="-filename-experiment" /> -->
+		<param name="function_noise" type="select" label="Function to calculate the noise from each scan" help="" argument="--function-noise">
+            <option value="median" selected="true">median intensity</option>
+            <option value="mean">mean intensity</option>
+            <option value="mad">mad (mean absolute deviation) intensity</option>
+            <option value="msfilereader">As shown in Xcalibur Qual Browser (Available for *.RAW files only)</option>
+        </param>
+        <param name="snr_threshold" type="float" value="3.0" label="Signal-to-noise threshold" help="Signal-to-noise ratio cutoff" argument="--snr-threshold" />
+        <param name="nscans" type="integer" value="1" label="Number of scans to process for each m/z range, header of segement" help="Use 0 to process all scans." argument="--nscans" />
+        <param name="ppm" type="float" value="2.0" label="Ppm error tolerance" help="Maximum tolerated m/z deviation in consecutive scans in parts per million (ppm)." argument="--ppm" />
+        <param name="min_fraction" min="0.01" max="1.0" type="float" value="0.5" label="Minimum fraction (i.e. percentage) of scans a peak has to be present." help="" argument="--min-fraction" />
+        <param name="rsd_threshold" type="hidden" value="" label="Relative standard deviation threshold" help="Maximum tolerated relative standard deviation (RSD) of the peak intensities across scans. A peak has to be present in a minimnum of three scans. Leave empty to skip this filter step." argument="--rsd-threshold" />
+        <param name="separator" type="hidden" value="tab" argument="--separator" />
+    </inputs>
+    <outputs>
+        <data name="pickle_file_out" format="zip" label="${tool.name} on ${on_string}: Peaklists (Python data file)" />
+        <collection name="peaklists_txt" type="list" label="${tool.name} on ${on_string}: Peaklists">
+            <discover_datasets pattern="(?P&lt;designation&gt;.+)\.txt" format="tsv" />
+	    </collection>
+    </outputs>
+    <tests>
+        <test>
+            <param name="input|format" value="zip_file" />
+            <param name="input|source" value="process_scans/MTBLS79_subset.zip" ftype="zip" />
+            <param name="filelist" value="process_scans/filelist_mzML.tsv" ftype="tsv" />
+            <param name="function" value="median" />
+            <param name="snr_threshold" value="3.0" />
+            <param name="ppm" value="2.0" />
+            <param name="nscans" value="1" />
+            <param name="min_fraction" value="0.5" />
+            <param name="rsd_threshold" value="" />
+            <param name="separator" value="tab" />
+            <output name="pickle_file_out" file="process_scans/test_out.pkl" ftype="zip" />
+            <output_collection name="peaklists_txt" type="list">
+                <element name="batch04_QC16_rep01_244">
+                    <assert_contents>
+                        <has_n_columns n="10" />
+                        <has_text_matching expression="mz\tintensity" />
+                    </assert_contents>
+                </element>
+                <element name="batch04_QC16_rep02_245">
+                    <assert_contents>
+                        <has_n_columns n="10" />
+                        <has_text_matching expression="mz\tintensity" />
+                    </assert_contents>
+                </element>
+                <element name="batch04_QC16_rep03_246">
+                    <assert_contents>
+                        <has_n_columns n="10" />
+                        <has_text_matching expression="mz\tintensity" />
+                    </assert_contents>
+                </element>
+            </output_collection>
+        </test>
+    </tests>
+    <help><![CDATA[""]]></help>
+    <expand macro="citations" />
+</tool>
